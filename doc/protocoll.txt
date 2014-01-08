@@ -1,0 +1,141 @@
+### Struktur ###
+## Verzeichnisse ##
+./CORBA-1/ (Stamm)
+-- c++ (c++ server)
+---- GNUmakefile 
+---- corba1_server.cc
+-- idl (IDL Files)
+---- echo.idl
+-- java (Java Client)
+---- build.xml (für Ant)
+---- src
+------- corba1_client.java
+
+## Test Aufbau ##
+10.0.104.115  - Willinger's PC (Nameserver & C++ Server)
+10.0.2.15 - Bobek's PC (Java Client)
+
+
+#### omniORB
+sudo apt-get install python python-dev ant
+wget http://sourceforge.net/projects/omniorb/files/omniORB/omniORB-4.1.7/omniORB-4.1.7.tar.bz2/download
+mv download omniORB-4.1.7.tar.bz2
+bunzip2 omniORB-4.1.7.tar.bz2 
+tar xfv omniORB-4.1.7.tar 
+cd omniORB-4.1.7/
+mdkir build
+cd build/
+../configure
+make
+make install
+mkdir $HOME/omniorb
+mkdir $HOME/omniorb/log
+mkdir $HOME/omniorb/etc
+cd ..
+cp sample.cfg $HOME/omniorb/etc/omniORB.cfg
+
+# datei anpassen:
+traceLevel = 5
+traceExceptions = 1
+traceInvocations = 1
+traceInvocationReturns = 1
+traceThreadId = 1
+traceTime = 1
+InitRef = NameService=corbaloc::localhost:2809/NameService
+supportBootstrapAgent = 1
+#end
+
+# .bashrc
+OMNINAMES_LOGDIR=$HOME/omniorb/log;
+export OMNINAMES_LOGDIR
+
+OMNIORB_CONFIG=$HOME/omniorb/etc/omniORB.cfg;
+export OMNIORB_CONFIG;
+
+LD_LIBRARY_PATH=/home/schueler/downloads/omniORB-4.1.7/build/lib;
+export LD_LIBRARY_PATH;
+#end
+omniNames -start & #erster start
+#beenden
+
+#### JACORB ####
+git clone https://github.com/JacORB/JacORB.git
+cd JacORB/
+ant
+
+# .bashrc
+"$HOME/downloads/JacORB/bin"
+#end
+
+######### Compiler #########
+omniOrb:
+
+cd $HOME/downloads/omniORB-4.1.7/src/examples/echo
+cp -R *  ~/CORBA-1/c++/
+cp $HOME/downloads/omniORB-4.1.7/idl/echo.dil ~/CORBA-1/idl
+
+makefile anpassen:
+LIB_DIR=$(HOME)/downloads/omniORB-4.1.7/build/lib
+INCLUDE_DIR=$(HOME)/downloads/omniORB-4.1.7/build/include
+
+all:: check_dir prebuild_idl prebuild_server build_idl build
+
+clean::
+        rm -f *.o *.d corba1_server
+        rm -R stub/
+
+check_dir:
+        -mkdir stub/
+
+prebuild_idl:
+        omniidl -bcxx -Wba -C./stub  ../idl/echo.idl
+
+build_idl:
+        cd stub/; omkdepend -D__cplusplus -D__GNUG__ -D__GNUC__ -D__OMNIORB4__ -D_REENTRANT -I. -I. -I$(INCLUDE_DIR) -D__OSVERSION__=2 -D__linux__ -D__x86_64__ echoDynSK.cc echoSK.cc; cd -
+        cd stub/; g++ -c -O2 -Wall -Wno-unused -fexceptions  -D__OMNIORB4__ -I../stub -D_REENTRANT -I. -I. -I$(INCLUDE_DIR) -D__OSVERSION__=2 -D__linux__ -D__x86_64__ -o echoSK.o echoSK.cc; cd -
+
+prebuild_server: 
+        omkdepend -D__cplusplus -D__GNUG__ -D__GNUC__ -D__OMNIORB4__ -D_REENTRANT -I. -I./ -I$(INCLUDE_DIR) -Istub/ -D__OSVERSION__=2 -D__linux__ -D__x86_64__ corba1_server.cc
+        g++ -c -O2 -Wall -Wno-unused -fexceptions  -D__OMNIORB4__ -D_REENTRANT -I. -I./ -I$(INCLUDE_DIR) -Istub/ -D__OSVERSION__=2 -D__linux__ -D__x86_64__ -o corba1_server.o corba1_server.cc
+
+build:
+        rm -f corba1_server
+        g++ -o corba1_server -O2 -Wall -Wno-unused -fexceptions -L$(LIB_DIR) corba1_server.o stub/echoSK.o -lomniORB4 -lomnithread -lpthread
+#end
+
+jacorb:
+
+config file
+## vi ~/orb.properties
+[..]
+ORBInitRef.NameService=corbaloc::10.0.104.115:2809/NameService
+[..]
+#####
+
+
+########## Test #############
+# programme erstellen
+# c++
+cd $HOME/CORBA-1/c++
+!! Pfade im Makefile müssen zur compilierten OmniORB Source zeigen(build/)!
+make
+
+# java
+cd ../java/
+ant
+
+# starten
+Zuerst omniOrb:
+omniNames
+
+
+# server
+cd ../c++/
+./corba1_server
+
+[screenshot]
+
+# client
+cd ../java/
+jaco -jar build/jar/corba1_client.jar
+[Screenshot]
