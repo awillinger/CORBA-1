@@ -15,3 +15,6 @@
 
 # Binary files
 bin/
+
+# Old files
+*.old
