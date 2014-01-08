@@ -1,21 +1,5 @@
-// eg3_impl.cc - This is the source code of example 3 used in Chapter 2
-//               "The Basics" of the omniORB user guide.
-//
-//               This is the object implementation.
-//
-// Usage: eg3_impl
-//
-//        On startup, the object reference is registered with the
-//        COS naming service. The client uses the naming service to
-//        locate this object.
-//
-//        The name which the object is bound to is as follows:
-//              root  [context]
-//               |
-//              test  [context] kind [my_context]
-//               |
-//              Echo  [object]  kind [Object]
-//
+// This is the Server Side of CORBA Assignment 1.
+// We didn't write this ourselves, we only changed the Reference Name on the NameServer
 
 #include <echo.hh>
 
