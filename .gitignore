@@ -15,6 +15,10 @@
 
 # Binary files
 bin/
+build/
 
+# Stubs
+stub/
+ 
 # Old files
 *.old
