@@ -18,14 +18,16 @@ public class corba1_client
             NamingContext ncRef = NamingContextHelper.narrow(objRef);
 
             // locate the service
-            NameComponent nc =  new NameComponent("test", "my_context");
+            NameComponent nc =  new NameComponent("echo", "corba1");
             NameComponent nc2 = new NameComponent("Echo", "Object");
 
             NameComponent path[] = { nc,nc2 };
             echoRef = EchoHelper.narrow(ncRef.resolve(path));
-
-            if (args.length > 1) {
-                setInfo = args[1];
+	
+            if (args.length > 0) 
+	    {
+		
+                setInfo = args[0];
             } 
 	    else 
 	    {
@@ -34,7 +36,7 @@ public class corba1_client
 
             System.out.println("Sending data to Server: "+setInfo);
             returnInfo = echoRef.echoString(setInfo);
-            System.out.println("Response from Server:"+returnInfo);
+            System.out.println("Response from Server: "+returnInfo);
 
         } 
 	catch (Exception e) 
@@ -53,6 +55,7 @@ public class corba1_client
 	{
 		index = r.nextInt(random.length);
 		out += this.random[index];
+		out += " ";
 	}
 	
 	return out;
